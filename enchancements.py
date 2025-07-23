@@ -43,7 +43,8 @@ class PromptEnchancements:
 
     def generate_optimized_image(self, user_prompt, enhancements, width=384, height=384):
 
-        API_TOKEN=os.getenv("HUGGING_FACE_API_TOKEN")
+        API_TOKEN=os.getenv("HUGGING_FACE_API_TOKEN_GV")
+        print(f'API_TOKEN: {API_TOKEN}')
         enhanced_prompt, negative_prompt = self.enhance_prompt(user_prompt, enhancements)
 
         seed = random.randint(0, 100000)
