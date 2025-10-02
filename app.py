@@ -13,10 +13,11 @@ from dotenv import load_dotenv
 IMAGE_FOLDER = "generated_images"
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000"], supports_credentials=True)  
+CORS(app, origins=["http://localhost:3000", "https://jarvis-designs.it.com"], supports_credentials=True)  
 
 pe = PromptEnchancements()
 ep = EnchancementsProperties()
+generate_image_count = 6
 
 load_dotenv()
 
@@ -40,7 +41,7 @@ def delete_old_generated_designs(folder_path):
             except OSError as e:
                 errors.append(f"Error deleting file {file_path}: {e}")
 
-    if deleted_count > 0:
+    if deleted_count >= generate_image_count:
         print(f"Successfully deleted {deleted_count} item(s) inside {folder_path}.")
 
     if errors:
@@ -78,7 +79,7 @@ def process_user_submission():
 
     image_urls = []
 
-    for idx in range(6):
+    for idx in range(generate_image_count):
         result_image = pe.generate_optimized_image(cleaned_prompt, ep.ECHANCEMENTS)
         if result_image:
             filename = save_image(result_image)
@@ -103,6 +104,11 @@ def download_image(filename):
         return send_file(file_path, as_attachment=True, download_name=f"design_{filename}")
     except FileNotFoundError:
         return jsonify({"error": "File not found"}), 404
+
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'healthy'}), 200
 
 
 if __name__ == "__main__":
