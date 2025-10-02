@@ -101,10 +101,10 @@ jobs:
               --webroot-path ${{ env.EC2_CERTBOT_DIR }} \
               --non-interactive \
               --agree-tos \
-              -m ${{ secrets.CERTBOT_EMAIL }} \
-              -d ${{ secrets.API_DOMAIN }}
+              -m johnkristan.torremocha01@gmail.com \
+              -d ai.jarvis-designs.it.com
 
-              
+
       - name: Ensure Certbot Auto-Renewal
         uses: appleboy/ssh-action@v1.0.2
         with:
