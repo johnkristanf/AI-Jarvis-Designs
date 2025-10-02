@@ -34,17 +34,6 @@ jobs:
           script: |
             mkdir -p ${{ env.EC2_SERVER_DIR }}
             mkdir -p ${{ env.EC2_CERTBOT_DIR }}
-
-
-      - name: Upload config files to EC2 using native SCP
-        uses: ./.github/actions/upload-config-files-ec2
-        with:
-          ec2_secret_key: ${{ secrets.EC2_SSH_KEY }}
-          ec2_ssh_address: ${{ env.EC2_SSH_ADDRESS }}
-          ec2_server_directory: ${{ env.EC2_SERVER_DIR }}
-          files_to_upload: "docker-compose.yml default.conf .env"
-
-
       - name: Install Docker and Docker Compose inside EC2
         uses: appleboy/ssh-action@v1.0.2
         with:
@@ -83,7 +72,27 @@ jobs:
             fi
 
 
-      - name: Install and Initialized Certbot SSL Certificates (webroot)
+
+      - name: Upload config files to EC2 using native SCP
+        uses: ./.github/actions/upload-config-files-ec2
+        with:
+          ec2_secret_key: ${{ secrets.EC2_SSH_KEY }}
+          ec2_ssh_address: ${{ env.EC2_SSH_ADDRESS }}
+          ec2_server_directory: ${{ env.EC2_SERVER_DIR }}
+          files_to_upload: "docker-compose.yml default.conf .env"
+
+      - name: Start nginx before Certbot
+        uses: appleboy/ssh-action@v1.0.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ${{ env.EC2_SERVER_DIR }}
+            docker compose up -d nginx
+
+
+      - name: Install and Setup Certbot SSL Certificates (webroot)
         uses: appleboy/ssh-action@v1.0.2
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -97,12 +106,11 @@ jobs:
 
             # Issue/Renew certificate using webroot
             sudo certbot certonly --webroot \
-              --webroot-path ${{ env.EC2_SERVER_DIR }}/certbot/www \
+              --webroot-path ${{ env.EC2_CERTBOT_DIR }} \
               --non-interactive \
               --agree-tos \
               -m ${{ secrets.CERTBOT_EMAIL }} \
               -d ${{ secrets.API_DOMAIN }}
-
 
       - name: Ensure Certbot Auto-Renewal
         uses: appleboy/ssh-action@v1.0.2
@@ -112,7 +120,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             sudo systemctl enable --now certbot.timer
-
 
       - name: 🚀 Deploy on EC2 via SSH
         uses: appleboy/ssh-action@v1.0.2
