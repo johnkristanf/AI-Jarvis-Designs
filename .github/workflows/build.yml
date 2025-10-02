@@ -24,7 +24,7 @@ jobs:
           run: docker build -t johnkristan/ai-jarvis-designs:latest .
 
         - name: Push Docker Image to Docker Hub
-          run: docker push johnkristan/jarvis-designs:latest
+          run: docker push johnkristan/ai-jarvis-designs:latest
 
     trigger-deploy:
         name: Trigger Deployment
