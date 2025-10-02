@@ -1,15 +1,10 @@
 import os
-import io
 import re
 import random
-import requests
-
 from huggingface_hub import InferenceClient
-from PIL import Image
 
 
 class PromptEnchancements:
-
     def enhance_prompt(self, basic_prompt: str, enhancements: dict[str, str]):
         core_concept = basic_prompt.strip().lower()
 
@@ -43,7 +38,7 @@ class PromptEnchancements:
 
     def generate_optimized_image(self, user_prompt, enhancements, width=384, height=384):
 
-        API_TOKEN=os.getenv("HUGGING_FACE_API_TOKEN_GV")
+        API_TOKEN=os.getenv("HUGGING_FACE_API_TOKEN")
         print(f'API_TOKEN: {API_TOKEN}')
         enhanced_prompt, negative_prompt = self.enhance_prompt(user_prompt, enhancements)
 
@@ -64,9 +59,6 @@ class PromptEnchancements:
         )
 
         return image
-    
-
-
     
 
 
