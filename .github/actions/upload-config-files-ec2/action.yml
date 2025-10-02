@@ -1,0 +1,62 @@
+name: Configuration Files to EC2
+description: Upload Files to EC2
+
+inputs:
+  ec2_secret_key:
+    description: Key Pair Secret Key to EC2
+    required: true
+
+  ec2_ssh_address:
+    description: EC2 server SSH address
+    required: true
+
+  ec2_server_directory:
+    description: Server directory path inside the ec2
+    required: true
+
+  files_to_upload:
+    description: 'Space-separated list of files to upload'
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Verify files exist
+      shell: bash
+      run: |
+        echo "Checking if files exist before upload..."
+        IFS=' ' read -ra FILES <<< "${{ inputs.files_to_upload }}"
+        for file in "${FILES[@]}"; do
+          if [[ ! -f "$file" ]]; then
+            echo "❌ File not found: $file"
+            exit 1
+          else
+            echo "✅ Found: $file"
+          fi
+        done
+
+    - name: Upload Files to EC2
+      shell: bash
+      run: |
+        echo "${{ inputs.ec2_secret_key }}" > temp_ssh_key
+        chmod 600 temp_ssh_key
+        echo "🔑 Key file created."
+
+        # IFS is the one who splits the string by its declared separator
+        IFS=' ' read -ra FILES <<< "${{ inputs.files_to_upload }}"
+
+        for file in "${FILES[@]}"; do
+          # Upload file to EC2 inside EC2_SERVER_DIR
+          scp -i temp_ssh_key -o StrictHostKeyChecking=no "$file" "${{ inputs.ec2_ssh_address }}:${{ inputs.ec2_server_directory }}/$target_file"
+        done
+
+
+    - name: Cleanup
+      shell: bash
+      if: always()
+      run: |
+        # Secure cleanup of SSH key
+        if [[ -f temp_ssh_key ]]; then
+          shred -u temp_ssh_key 2>/dev/null || rm -f temp_ssh_key
+          echo "🧹 SSH key cleaned up"
+        fi

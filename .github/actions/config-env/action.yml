@@ -1,0 +1,17 @@
+name: Configure Environment Variables
+description: Load Environment Variables for EC2
+
+inputs:
+  hugging_face_api_token:
+    description: "Hugging Face API Token for FLUX model"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Write .env file
+      shell: bash
+      run: |
+        cat <<'EOF' > .env
+          HUGGING_FACE_API_TOKEN=${{ inputs.hugging_face_api_token }}
+        EOF
