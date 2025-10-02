@@ -1,5 +1,7 @@
 __pycache__
-generated_images
 *.pyc
 .venv
+venv
 .env
+
+generated_images/*
