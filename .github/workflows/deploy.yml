@@ -90,6 +90,7 @@ jobs:
             cd ${{ env.EC2_SERVER_DIR }}
             docker compose up -d nginx
             docker ps
+            docker logs nginx
 
       - name: Install and Setup Certbot SSL Certificates (webroot)
         uses: appleboy/ssh-action@v1.0.2
