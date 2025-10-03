@@ -90,7 +90,7 @@ jobs:
             cd ${{ env.EC2_SERVER_DIR }}
 
             echo "${{ secrets.DOCKER_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-            docker cp default.nossl.conf nginx:/etc/nginx/conf.d/default.conf
+            cp default.nossl.conf default.conf
             docker compose up -d
 
             docker ps
@@ -125,7 +125,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ${{ env.EC2_SERVER_DIR }}
-            docker cp default.conf nginx:/etc/nginx/conf.d/default.conf
             docker compose restart nginx
 
       - name: Ensure Certbot Auto-Renewal
