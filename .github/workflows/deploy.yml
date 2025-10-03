@@ -72,13 +72,13 @@ jobs:
               sudo apt-get install -y docker-compose-plugin
             fi
 
-      - name: Upload non-SSL nginx config to EC2
+      - name: Upload config files to EC2
         uses: ./.github/actions/upload-config-files-ec2
         with:
           ec2_secret_key: ${{ secrets.EC2_SSH_KEY }}
           ec2_ssh_address: ${{ env.EC2_SSH_ADDRESS }}
           ec2_server_directory: ${{ env.EC2_SERVER_DIR }}
-          files_to_upload: "docker-compose.yml default.nossl.conf .env"
+          files_to_upload: "docker-compose.yml default.conf default.nossl.conf .env"
 
       - name: Start nginx (non-SSL) before Certbot
         uses: appleboy/ssh-action@v1.0.2
@@ -88,7 +88,11 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ${{ env.EC2_SERVER_DIR }}
-            docker compose up -d --remove-orphans
+
+            echo "${{ secrets.DOCKER_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            docker cp default.nossl.conf nginx:/etc/nginx/conf.d/default.conf
+            docker compose up -d
+
             docker ps
             docker logs nginx
 
@@ -113,16 +117,7 @@ jobs:
               -d ai.jarvis-designs.it.com
 
               
-      - name: Upload SSL nginx config to EC2
-        uses: ./.github/actions/upload-config-files-ec2
-        with:
-          ec2_secret_key: ${{ secrets.EC2_SSH_KEY }}
-          ec2_ssh_address: ${{ env.EC2_SSH_ADDRESS }}
-          ec2_server_directory: ${{ env.EC2_SERVER_DIR }}
-          files_to_upload: "default.conf"
-
-
-      - name: Reload nginx with SSL config
+      - name: Restart nginx with SSL config
         uses: appleboy/ssh-action@v1.0.2
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -130,6 +125,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ${{ env.EC2_SERVER_DIR }}
+            docker cp default.conf nginx:/etc/nginx/conf.d/default.conf
             docker compose restart nginx
 
       - name: Ensure Certbot Auto-Renewal
