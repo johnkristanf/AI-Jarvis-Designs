@@ -35,16 +35,6 @@ jobs:
             mkdir -p ${{ env.EC2_SERVER_DIR }}
             mkdir -p ${{ env.EC2_CERTBOT_DIR }}
 
-            
-      - name: Upload config files to EC2 using native SCP
-        uses: ./.github/actions/upload-config-files-ec2
-        with:
-          ec2_secret_key: ${{ secrets.EC2_SSH_KEY }}
-          ec2_ssh_address: ${{ env.EC2_SSH_ADDRESS }}
-          ec2_server_directory: ${{ env.EC2_SERVER_DIR }}
-          files_to_upload: "docker-compose.yml default.conf .env"
-
-
       - name: Install Docker and Docker Compose inside EC2
         uses: appleboy/ssh-action@v1.0.2
         with:
@@ -82,7 +72,23 @@ jobs:
               sudo apt-get install -y docker-compose-plugin
             fi
 
+      - name: Upload non-SSL nginx config to EC2
+        uses: ./.github/actions/upload-config-files-ec2
+        with:
+          ec2_secret_key: ${{ secrets.EC2_SSH_KEY }}
+          ec2_ssh_address: ${{ env.EC2_SSH_ADDRESS }}
+          ec2_server_directory: ${{ env.EC2_SERVER_DIR }}
+          files_to_upload: "docker-compose.yml default.nossl.conf .env"
 
+      - name: Start nginx (non-SSL) before Certbot
+        uses: appleboy/ssh-action@v1.0.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ${{ env.EC2_SERVER_DIR }}
+            docker compose up -d nginx
 
       - name: Install and Setup Certbot SSL Certificates (webroot)
         uses: appleboy/ssh-action@v1.0.2
@@ -104,6 +110,23 @@ jobs:
               -m johnkristan.torremocha01@gmail.com \
               -d ai.jarvis-designs.it.com
 
+      - name: Upload SSL nginx config to EC2
+        uses: ./.github/actions/upload-config-files-ec2
+        with:
+          ec2_secret_key: ${{ secrets.EC2_SSH_KEY }}
+          ec2_ssh_address: ${{ env.EC2_SSH_ADDRESS }}
+          ec2_server_directory: ${{ env.EC2_SERVER_DIR }}
+          files_to_upload: "default.conf"
+
+      - name: Reload nginx with SSL config
+        uses: appleboy/ssh-action@v1.0.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ${{ env.EC2_SERVER_DIR }}
+            docker compose restart nginx
 
       - name: Ensure Certbot Auto-Renewal
         uses: appleboy/ssh-action@v1.0.2
