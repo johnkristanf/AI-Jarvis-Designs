@@ -89,6 +89,7 @@ jobs:
           script: |
             cd ${{ env.EC2_SERVER_DIR }}
             docker compose up -d nginx
+            docker ps
 
       - name: Install and Setup Certbot SSL Certificates (webroot)
         uses: appleboy/ssh-action@v1.0.2
