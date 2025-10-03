@@ -14,6 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 EXPOSE 5000
-
-RUN chmod +x /app/entrypoint.sh
-ENTRYPOINT [ "/app/entrypoint.sh" ]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "wsgi:app"]

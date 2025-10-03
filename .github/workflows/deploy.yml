@@ -80,7 +80,7 @@ jobs:
           ec2_server_directory: ${{ env.EC2_SERVER_DIR }}
           files_to_upload: "docker-compose.yml default.conf default.nossl.conf .env"
 
-      - name: Start nginx (non-SSL) before Certbot
+      - name: Start nginx (non-SSL) before Certbot 123
         uses: appleboy/ssh-action@v1.0.2
         with:
           host: ${{ secrets.EC2_HOST }}
