@@ -125,7 +125,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ${{ env.EC2_SERVER_DIR }}
-            docker cp default.conf nginx:/etc/nginx/conf.d/default.conf
             docker compose restart nginx
 
       - name: Ensure Certbot Auto-Renewal
