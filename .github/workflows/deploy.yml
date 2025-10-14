@@ -115,7 +115,7 @@ jobs:
               --webroot-path ${{ env.EC2_CERTBOT_DIR }} \
               --non-interactive \
               --agree-tos \
-              -m johnkristan.torremocha01@gmail.com \
+              -m torremocha.johnkristan@gmail.com \
               -d ai.jarvis-designs.it.com
 
               
