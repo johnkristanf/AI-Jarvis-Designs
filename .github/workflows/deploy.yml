@@ -92,6 +92,10 @@ jobs:
             touch default.conf
             cp default.nossl.conf default.conf
 
+            echo "📄 Current default.conf content:"
+            ls -lah
+            cat default.conf
+
             echo "${{ secrets.DOCKER_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
             docker compose pull
@@ -131,6 +135,14 @@ jobs:
             cd ${{ env.EC2_SERVER_DIR }}
 
             cp default.ssl.conf default.conf
+
+            # Test nginx config before restarting
+            docker compose exec -T nginx nginx -t || {
+              echo "❌ Nginx config test failed!"
+              cat default.conf
+              exit 1
+            }
+            
             docker compose restart nginx
 
       - name: Ensure Certbot Auto-Renewal
