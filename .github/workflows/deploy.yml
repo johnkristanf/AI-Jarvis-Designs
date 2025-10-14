@@ -90,9 +90,9 @@ jobs:
             cd ${{ env.EC2_SERVER_DIR }}
 
             touch default.conf
+            cp default.nossl.conf default.conf
 
             echo "${{ secrets.DOCKER_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-            cp default.nossl.conf default.conf
 
             docker compose pull
             docker compose up -d
@@ -145,7 +145,7 @@ jobs:
       - name: 🚀 Deploy on EC2 via SSH
         uses: appleboy/ssh-action@v1.0.2
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ secrets.EC2_HOST }} 
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
