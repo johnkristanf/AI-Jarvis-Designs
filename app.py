@@ -1,4 +1,4 @@
-import os 
+import os
 import uuid
 
 
@@ -13,7 +13,11 @@ from dotenv import load_dotenv
 IMAGE_FOLDER = "generated_images"
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000", "https://jarvis-designs.it.com"], supports_credentials=True)  
+CORS(
+    app,
+    origins=["http://localhost:3000", "https://jarvis-designs.it.com"],
+    supports_credentials=True,
+)
 
 pe = PromptEnchancements()
 ep = EnchancementsProperties()
@@ -50,7 +54,6 @@ def delete_old_generated_designs(folder_path):
             print(f"- {error}")
 
 
-
 def save_image(result_image):
     filename = f"{uuid.uuid4().hex}.png"
     filepath = os.path.join(IMAGE_FOLDER, filename)
@@ -58,7 +61,7 @@ def save_image(result_image):
     return filename
 
 
-@app.route('/generate/design', methods=['POST'])
+@app.route("/generate/design", methods=["POST"])
 def process_user_submission():
 
     # DELETE SAVED OLD GENERATED IMAGES BEFORE CREATING NEW ONES
@@ -67,15 +70,17 @@ def process_user_submission():
     data = request.get_json()
     if not data:
         return jsonify({"error": "No JSON payload received"}), 400
-    
-    user_prompt = data.get('prompt')
-    style_preference = data.get('style_preference')
+
+    user_prompt = data.get("prompt")
+    style_preference = data.get("style_preference")
 
     cleaned_prompt = pe.sanitize_prompt(user_prompt)
 
     if style_preference:
         if style_preference in ep.STYLE_PREFERENCE:
-            cleaned_prompt = f"{cleaned_prompt}, {ep.STYLE_PREFERENCE[style_preference]}"
+            cleaned_prompt = (
+                f"{cleaned_prompt}, {ep.STYLE_PREFERENCE[style_preference]}"
+            )
 
     image_urls = []
 
@@ -90,29 +95,27 @@ def process_user_submission():
 
 
 # SERVING THE IMAGE TO THE BROWSER
-@app.route('/generated/image/<filename>', methods=['GET'])
+@app.route("/generated/image/<filename>", methods=["GET"])
 def serve_image(filename):
     return send_from_directory(IMAGE_FOLDER, filename)
 
 
-
 # DOWNLOADING THE IMAGE
-@app.route('/download/image/<filename>', methods=['GET'])
+@app.route("/download/image/<filename>", methods=["GET"])
 def download_image(filename):
     file_path = os.path.join(IMAGE_FOLDER, filename)
     try:
-        return send_file(file_path, as_attachment=True, download_name=f"design_{filename}")
+        return send_file(
+            file_path, as_attachment=True, download_name=f"design_{filename}"
+        )
     except FileNotFoundError:
         return jsonify({"error": "File not found"}), 404
 
 
-@app.route('/health', methods=['GET'])
+@app.route("/health", methods=["GET"])
 def health():
-    return jsonify({'status': 'healthy'}), 200
+    return jsonify({"status": "healthy"}), 200
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
-
-
-
+    app.run(debug=True, host="0.0.0.0", port=5000)

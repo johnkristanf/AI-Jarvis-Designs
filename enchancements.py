@@ -10,37 +10,41 @@ class PromptEnchancements:
 
         category = None
         for categ in enhancements.keys():
-            if categ in core_concept or any(word in core_concept for word in [f"{categ}", f"{categ}ed"]):
+            if categ in core_concept or any(
+                word in core_concept for word in [f"{categ}", f"{categ}ed"]
+            ):
                 category = categ
                 break
 
         if not category:
             category = "general"
-            enhancements["general"] = "high detail, professional photography, beautiful composition, 8k quality, realistic"
-        
+            enhancements["general"] = (
+                "high detail, professional photography, beautiful composition, 8k quality, realistic"
+            )
+
         enhanced = f"{basic_prompt}, {enhancements[category]}"
         negative_prompt = "low quality, blurry, distorted, disfigured, poorly drawn, bad anatomy, watermark, signature, text"
 
         return enhanced, negative_prompt
-    
-
 
     def sanitize_prompt(self, prompt):
         """Clean up and fix common prompt issues"""
-        prompt = re.sub(r'[!?,.]+ ?', '. ', prompt)
-        prompt = re.sub(r'\s+', ' ', prompt).strip()
-            
+        prompt = re.sub(r"[!?,.]+ ?", ". ", prompt)
+        prompt = re.sub(r"\s+", " ", prompt).strip()
+
         prompt = prompt.lower()
-            
+
         return prompt
-    
 
+    def generate_optimized_image(
+        self, user_prompt, enhancements, width=384, height=384
+    ):
 
-    def generate_optimized_image(self, user_prompt, enhancements, width=384, height=384):
-
-        API_TOKEN=os.getenv("HUGGING_FACE_API_TOKEN")
-        print(f'API_TOKEN: {API_TOKEN}')
-        enhanced_prompt, negative_prompt = self.enhance_prompt(user_prompt, enhancements)
+        API_TOKEN = os.getenv("HUGGING_FACE_API_TOKEN")
+        print(f"API_TOKEN: {API_TOKEN}")
+        enhanced_prompt, negative_prompt = self.enhance_prompt(
+            user_prompt, enhancements
+        )
 
         seed = random.randint(0, 100000)
 
@@ -59,8 +63,6 @@ class PromptEnchancements:
         )
 
         return image
-    
-
 
 
 class EnchancementsProperties:
@@ -80,5 +82,5 @@ class EnchancementsProperties:
         "cartoon": "cartoon style, vibrant colors, disney pixar style",
         "anime": "anime style, colorful, detailed, studio ghibli inspired",
         "painting": "oil painting, detailed brushwork, professional art",
-        "sketch": "pencil sketch, detailed, black and white, professional drawing"
+        "sketch": "pencil sketch, detailed, black and white, professional drawing",
     }
