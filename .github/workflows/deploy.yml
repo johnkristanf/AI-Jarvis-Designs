@@ -111,7 +111,7 @@ jobs:
 
             # Issue/Renew certificate using webroot
             sudo certbot certonly --webroot \
-              --webroot-path ${{ env.EC2_CERTBOT_DIR }} \
+              --webroot-path ${{ env.EC2_CERTBOT_DIR }} \ 
               --non-interactive \
               --agree-tos \
               -m torremocha.johnkristan@gmail.com \
