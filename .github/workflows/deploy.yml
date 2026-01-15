@@ -111,11 +111,12 @@ jobs:
 
             # Issue/Renew certificate using webroot
             sudo certbot certonly --webroot \
-              --webroot-path ${{ env.EC2_CERTBOT_DIR }} \ 
+              --webroot-path ${{ env.EC2_CERTBOT_DIR }} \
               --non-interactive \
               --agree-tos \
-              -m torremocha.johnkristan@gmail.com \
+              -m torremocha.johnkristan01@gmail.com \
               -d ai.jarvis-designs.it.com
+
 
       - name: Restart nginx with SSL config
         uses: appleboy/ssh-action@v1.0.2
